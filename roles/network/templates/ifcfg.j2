@@ -21,3 +21,6 @@ DNS2=8.8.4.4
 {% if item.value.type == "Bond" and item.value.opts is defined %}
 BONDING_OPTS="{{ item.value.opts }}"
 {% endif %}
+{% if item.value.type == "Bridge" and item.value.delay is defined %}
+DELAY={{ item.value.delay }}
+{% endif %}

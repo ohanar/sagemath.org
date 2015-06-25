@@ -2,6 +2,7 @@
 network_interfaces:
   br0:
     type: Bridge
+    delay: 0
   bond0:
     type: Bond
     opts: mode=4 miimon=100 lacp_rate=1
