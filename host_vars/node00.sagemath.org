@@ -1,0 +1,10 @@
+---
+network_interfaces:
+  br0:
+    ipaddr:  128.208.160.164
+    gateway: 128.208.160.129
+    netmask: 255.255.255.128
+  em1:
+    hwaddr: "04:7D:7B:FC:B2:79"
+  em2:
+    hwaddr: "04:7D:7B:FC:B2:7A"

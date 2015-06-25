@@ -1,0 +1,13 @@
+[baremetal]
+node[00:01].sagemath.org
+node[10:18].sagemath.org
+node[20:23].sagemath.org
+node[30:31].sagemath.org
+webhost.sagemath.org
+
+[r415]
+node[00:01].sagemath.org
+node[10:18].sagemath.org
+node[20:23].sagemath.org
+node[30:31].sagemath.org
+webhost.sagemath.org

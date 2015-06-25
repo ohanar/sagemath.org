@@ -1,0 +1,20 @@
+---
+- name: Installed
+  when: ansible_os_family == "RedHat"
+  yum:
+    name: bridge-utils
+  tags:
+    - network
+
+- name: Configuration
+  when: ansible_os_family == "RedHat"
+  template:
+    src: ifcfg.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ item.key }}
+    owner: root
+    group: root
+    mode: 0644
+  with_dict: "{{ network_interfaces }}"
+  notify: Restart
+  tags:
+    - network

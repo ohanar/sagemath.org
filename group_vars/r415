@@ -1,0 +1,14 @@
+---
+network_interfaces:
+  br0:
+    type: Bridge
+  bond0:
+    type: Bond
+    opts: mode=4 miimon=100 lacp_rate=1
+    bridge: br0
+  em1:
+    type: Ethernet
+    bond: bond0
+  em2:
+    type: Ethernet
+    bond: bond0

@@ -1,0 +1,23 @@
+DEVICE={{ item.key }}
+NAME={{ item.key }}
+TYPE={{ item.value.type }}
+ONBOOT=yes
+BOOTPROTO=none
+{% if item.value.hwaddr is defined %}
+HWADDR={{ item.value.hwaddr }}
+{% endif %}
+{% if item.value.bond is defined %}
+MASTER={{ item.value.bond }}
+SLAVE=yes
+{% elif item.value.bridge is defined %}
+BRIDGE={{ item.value.bridge }}
+{% else %}
+IPADDR={{ item.value.ipaddr }}
+GATEWAY={{ item.value.gateway }}
+NETMASK={{ item.value.netmask }}
+DNS1=8.8.8.8
+DNS2=8.8.4.4
+{% endif %}
+{% if item.value.type == "Bond" and item.value.opts is defined %}
+BONDING_OPTS="{{ item.value.opts }}"
+{% endif %}

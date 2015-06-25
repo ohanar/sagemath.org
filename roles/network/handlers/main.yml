@@ -1,0 +1,8 @@
+- name: Restart
+  when: ansible_os_family == "RedHat"
+  service:
+    name: network
+    enabled: true
+    state: restarted
+  tags:
+    - network
