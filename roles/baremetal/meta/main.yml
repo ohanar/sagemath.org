@@ -1,0 +1,11 @@
+---
+dependencies:
+  -
+    role: network
+  -
+    role: willshersystems.sshd
+    sudo: true
+    sshd:
+      PermitRootLogin: false
+      PasswordAuthentication: false
+      X11Forwarding: false
