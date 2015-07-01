@@ -1,0 +1,18 @@
+---
+- name: packages
+  sudo: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "@Development tools"
+  tags:
+    - base
+
+- name: Update
+  sudo: true
+  yum:
+    name: "*"
+    state: latest
+  tags:
+    - update
