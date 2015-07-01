@@ -1,0 +1,6 @@
+---
+- hosts: slurmhosts
+  roles:
+    - common
+    - baremetal
+    - blcr

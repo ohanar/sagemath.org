@@ -1,8 +1,12 @@
-[baremetal]
+[devhosts]
 node[00:01].sagemath.org
+
+[slurmhosts]
 node[10:18].sagemath.org
 node[20:23].sagemath.org
 node[30:31].sagemath.org
+
+[webhosts]
 webhost.sagemath.org
 
 [r415]

@@ -1,15 +1,4 @@
 ---
-- hosts: baremetal
-  sudo: true
-  vars:
-    sshd:
-      PermitRootLogin: false
-      PasswordAuthentication: false
-      X11Forwarding: false
-  roles:
-    - role: willshersystems.sshd
-
-- hosts: baremetal
-  sudo: true
-  roles:
-    - role: network
+- include: devhosts.yml
+- include: slurmhosts.yml
+- include: webhosts.yml

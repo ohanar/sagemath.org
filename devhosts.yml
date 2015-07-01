@@ -1,0 +1,5 @@
+---
+- hosts: devhosts
+  roles:
+    - common
+    - baremetal
