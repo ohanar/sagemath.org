@@ -1,12 +1,13 @@
 ---
-- name: Installed
+- name: installing dependencies
   when: ansible_os_family == "RedHat"
   yum:
     name: bridge-utils
+    state: present
   tags:
     - network
 
-- name: Configuration
+- name: configuring
   when: ansible_os_family == "RedHat"
   template:
     src: ifcfg.j2
@@ -15,6 +16,6 @@
     group: root
     mode: 0644
   with_dict: "{{ network_interfaces }}"
-  notify: Restart
+  notify: restarting
   tags:
     - network

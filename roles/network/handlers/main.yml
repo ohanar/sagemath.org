@@ -1,4 +1,4 @@
-- name: Restart
+- name: restarting
   when: ansible_os_family == "RedHat"
   service:
     name: network
