@@ -1,0 +1,44 @@
+---
+- name: setting some variables
+  include_vars: blcr_vars.yml
+  tags:
+    - blcr
+
+- name: installing dependencies
+  sudo: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "@Development tools"
+    - kernel-devel
+    - kernel-headers
+    - rpm-build
+  tags:
+    - blcr
+
+- name: building
+  command: /usr/bin/rpmbuild --rebuild {{ blcr_url }} --define 'with_multilib 0'
+  args:
+    creates: "{{ blcr_bin }}"
+  tags:
+    - blcr
+
+- name: checking if we are upgrading
+  command: /usr/bin/rpm --query blcr
+  register: blcr_query
+  failed_when: false
+  changed_when: false
+  tags:
+    - blcr
+
+- name: installing
+  sudo: true
+  command: >
+    /usr/bin/rpm -v
+      {{ '--install' if blcr_query.rc == 1 else '--freshen' }}
+      "{{ blcr_libs }}" "{{ blcr_bin }}" "{{ blcr_modules }}"
+  tags:
+    - blcr
+  register: blcr_update_result
+  changed_when: blcr_update_result.stdout != ""

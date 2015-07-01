@@ -1,0 +1,17 @@
+---
+blcr_version: 0.8.6_b4-1
+blcr_url_base: "https://upc-bugs.lbl.gov/blcr-dist"
+blcr_out_dir: "{{ ansible_user_dir }}/rpmbuild/RPMS/{{ ansible_architecture }}"
+
+blcr_src_rpm: "blcr-{{ blcr_version }}.src.rpm"
+blcr_bin_rpm: "blcr-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
+blcr_libs_rpm: "blcr-libs-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
+blcr_modules_rpm: "blcr-modules_{{ ansible_kernel | replace('-', '_') }}-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
+blcr_devel_rpm: "blcr-devel-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
+
+blcr_url: "{{ blcr_url_base }}/{{ blcr_src_rpm }}"
+
+blcr_bin: "{{ blcr_out_dir }}/{{ blcr_bin_rpm }}"
+blcr_libs: "{{ blcr_out_dir }}/{{ blcr_libs_rpm }}"
+blcr_modules: "{{ blcr_out_dir }}/{{ blcr_modules_rpm }}"
+blcr_devel: "{{ blcr_out_dir }}/{{ blcr_devel_rpm }}"
