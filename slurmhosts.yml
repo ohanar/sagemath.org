@@ -4,3 +4,6 @@
     - common
     - baremetal
     - blcr
+  vars:
+    blcr:
+      modules: true

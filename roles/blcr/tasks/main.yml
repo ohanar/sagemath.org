@@ -17,28 +17,59 @@
   tags:
     - blcr
 
+- name: installing source rpm
+  command: /usr/bin/rpm --install {{ blcr_url }}
+  args:
+    creates: "{{ blcr_spec }}"
+  tags:
+    - blcr
+
+- name: patching sources
+  patch:
+    dest: "{{ blcr_spec }}"
+    src: blcr_spec.patch
+    remote_src: false
+  tags:
+    - blcr
+
 - name: building
-  command: /usr/bin/rpmbuild --rebuild {{ blcr_url }} --define 'with_multilib 0'
+  command: /usr/bin/rpmbuild -bb {{ blcr_spec }} --define 'with_multilib 0'
   args:
     creates: "{{ blcr_bin }}"
   tags:
     - blcr
 
-- name: checking if we are upgrading
-  command: /usr/bin/rpm --query blcr
-  register: blcr_query
-  failed_when: false
-  changed_when: false
+- name: installing
+  sudo: true
+  yum:
+    state: present
+    name: "{{ item }}"
+  with_items: blcr_pkgs
+  when: item != ''
   tags:
     - blcr
 
-- name: installing
+- name: loading modules
   sudo: true
-  command: >
-    /usr/bin/rpm -v
-      {{ '--install' if blcr_query.rc == 1 else '--freshen' }}
-      "{{ blcr_libs }}" "{{ blcr_bin }}" "{{ blcr_modules }}"
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - blcr_imports
+    - blcr
+  when: blcr.modules is defined and blcr.modules
   tags:
     - blcr
-  register: blcr_update_result
-  changed_when: blcr_update_result.stdout != ""
+
+- name: registering modules to load at boot
+  sudo: true
+  lineinfile:
+    dest: /etc/modules-load.d/blcr.conf
+    create: true
+    line: "{{ item }}"
+    state: present
+  with_items:
+    - blcr_imports
+    - blcr
+  tags:
+    - blcr

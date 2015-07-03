@@ -1,0 +1,28 @@
+--- blcr-0.8.6_b4.spec	2015-07-02 13:13:46.901257495 -0700
++++ blcr-0.8.6_b4.spec	2015-07-02 13:20:11.831284051 -0700
+@@ -37,7 +37,7 @@
+ %define kernel %{?kernel_ver:%{kernel_ver}}%{!?kernel_ver:%(uname -r)}
+ 
+ # Name the kernel modules package w/o dashes in the kernel version:
+-%define modsubpkg modules_%(echo %{kernel} | tr - _)
++%define modsubpkg modules
+ %define moduledir /lib/modules/%{kernel}/extra
+ 
+ # Name of the unpacked source directory and stem of the tarball name
+@@ -88,7 +88,7 @@
+ # i386 is omitted because it lacks required atomic instructions
+ ExclusiveArch: i486 i586 i686 athlon x86_64 ppc ppc64 arm
+ ExclusiveOs: Linux
+-Requires: %{name}-modules >= %{version}-%{release}
++Requires: %{name}-libs = %{version}-%{release}
+ 
+ # DON'T require since many clusters are built w/ non-RPM kernels:
+ # BuildPreReq: kernel-source = %{kernel}
+@@ -318,7 +318,6 @@
+ Group: System Environment/Kernel
+ Summary: Kernel modules for Berkeley Lab Checkpoint/Restart for Linux
+ Provides: %{name}-modules = %{version}-%{release}
+-Requires: %{name} = %{version}
+ # DON'T require since many clusters are built w/ non-RPM kernels:
+ # Requires: kernel = %{kernel}
+ 

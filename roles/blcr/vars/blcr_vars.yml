@@ -1,13 +1,20 @@
 ---
-blcr_version: 0.8.6_b4-1
+blcr_version: 0.8.6_b4
+blcr_release: 1
+blcr_verrel: "{{ blcr_version }}-{{ blcr_release }}"
 blcr_url_base: "https://upc-bugs.lbl.gov/blcr-dist"
+
+blcr_src_dir: "{{ ansible_user_dir }}/rpmbuild/SOURCES"
+blcr_spec_dir: "{{ ansible_user_dir }}/rpmbuild/SPECS"
 blcr_out_dir: "{{ ansible_user_dir }}/rpmbuild/RPMS/{{ ansible_architecture }}"
 
-blcr_src_rpm: "blcr-{{ blcr_version }}.src.rpm"
-blcr_bin_rpm: "blcr-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
-blcr_libs_rpm: "blcr-libs-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
-blcr_modules_rpm: "blcr-modules_{{ ansible_kernel | replace('-', '_') }}-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
-blcr_devel_rpm: "blcr-devel-{{ blcr_version }}.{{ ansible_architecture }}.rpm"
+blcr_spec: "{{ blcr_spec_dir }}/blcr-{{ blcr_version }}.spec"
+
+blcr_src_rpm: "blcr-{{ blcr_verrel }}.src.rpm"
+blcr_bin_rpm: "blcr-{{ blcr_verrel }}.{{ ansible_architecture }}.rpm"
+blcr_libs_rpm: "blcr-libs-{{ blcr_verrel }}.{{ ansible_architecture }}.rpm"
+blcr_modules_rpm: "blcr-modules-{{ blcr_verrel }}.{{ ansible_architecture }}.rpm"
+blcr_devel_rpm: "blcr-devel-{{ blcr_verrel }}.{{ ansible_architecture }}.rpm"
 
 blcr_url: "{{ blcr_url_base }}/{{ blcr_src_rpm }}"
 
@@ -15,3 +22,9 @@ blcr_bin: "{{ blcr_out_dir }}/{{ blcr_bin_rpm }}"
 blcr_libs: "{{ blcr_out_dir }}/{{ blcr_libs_rpm }}"
 blcr_modules: "{{ blcr_out_dir }}/{{ blcr_modules_rpm }}"
 blcr_devel: "{{ blcr_out_dir }}/{{ blcr_devel_rpm }}"
+
+blcr_pkgs:
+  - "{{ blcr_libs if (blcr.bin is defined and blcr.bin) or (blcr.libs is defined and blcr.libs) else '' }}"
+  - "{{ blcr_bin if blcr.bin is defined and blcr.bin else '' }}"
+  - "{{ blcr_modules if blcr.modules is defined and blcr.modules else '' }}"
+  - "{{ blcr_devel if blcr.devel is defined and blcr.devel else '' }}"
