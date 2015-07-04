@@ -1,0 +1,30 @@
+---
+- name: setting some variables
+  include_vars: lxc_vars.yml
+
+- name: installing dependencies
+  sudo: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "@Development tools"
+    - docbook-utils
+    - docbook2X
+    - libselinux-devel
+    - libseccomp-devel
+    - libcap-devel
+    - lua-devel
+
+- name: building
+  command: >
+    /usr/bin/rpmbuild --rebuild {{ lxc_url }}
+  args:
+    creates: "{{ lxc_pkg }}"
+
+- name: installing
+  sudo: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: lxc_pkgs

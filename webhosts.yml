@@ -1,5 +1,11 @@
 ---
 - hosts: webhosts
   roles:
-    - common
-    - baremetal
+    -
+      role: common
+      tags:
+        - common
+    -
+      role: baremetal
+      tags:
+        - baremetal

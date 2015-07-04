@@ -1,0 +1,5 @@
+- name: installing
+  sudo: true
+  yum:
+    name: epel-release
+    state: present

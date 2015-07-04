@@ -1,9 +1,22 @@
 ---
 - hosts: slurmhosts
   roles:
-    - common
-    - baremetal
-    - blcr
+    -
+      role: common
+      tags:
+        - common
+    -
+      role: baremetal
+      tags:
+        - baremetal
+    -
+      role: blcr
+      tags:
+        - blcr
+    -
+      role: lxc
+      tags:
+        - lxc
   vars:
     blcr:
       modules: true

@@ -1,0 +1,21 @@
+---
+lxc_version: 1.1.2
+lxc_release: 1
+lxc_verrel: "{{ lxc_version }}-{{ lxc_release }}"
+
+lxc_url: "ftp://rpmfind.net/linux/fedora/linux/development/rawhide/source/SRPMS/l/lxc-{{ lxc_verrel }}.fc23.1.src.rpm"
+
+rpm_src_dir: "{{ ansible_user_dir }}/rpmbuild/SOURCES"
+rpm_spec_dir: "{{ ansible_user_dir }}/rpmbuild/SPECS"
+rpm_out_dir: "{{ ansible_user_dir }}/rpmbuild/RPMS/{{ ansible_architecture }}"
+
+lxc_libs: "{{ rpm_out_dir }}/lxc-libs-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
+lxc_lua: "{{ rpm_out_dir }}/lua-lxc-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
+lxc_pkg: "{{ rpm_out_dir }}/lxc-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
+lxc_templates: "{{ rpm_out_dir }}/lxc-templates-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
+
+lxc_pkgs:
+  - "{{ lxc_libs }}"
+  - "{{ lxc_lua }}"
+  - "{{ lxc_pkg }}"
+  - "{{ lxc_templates }}"

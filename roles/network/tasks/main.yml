@@ -4,8 +4,6 @@
   yum:
     name: bridge-utils
     state: present
-  tags:
-    - network
 
 - name: configuring
   when: ansible_os_family == "RedHat"
@@ -17,5 +15,3 @@
     mode: 0644
   with_dict: "{{ network_interfaces }}"
   notify: restarting
-  tags:
-    - network

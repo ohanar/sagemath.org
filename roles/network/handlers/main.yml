@@ -4,5 +4,3 @@
     name: network
     enabled: true
     state: restarted
-  tags:
-    - network
