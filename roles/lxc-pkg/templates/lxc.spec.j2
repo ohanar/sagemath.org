@@ -1,0 +1,511 @@
+%if 0%{?fedora}
+%global with_python3 1
+%endif
+
+%if 0%{?fedora} || 0%{?rhel} >= 7
+%global with_systemd 1
+%endif
+
+%if 0%{?fedora} || 0%{?rhel} >= 7
+%ifarch %{ix86} x86_64 %{arm} aarch64
+%global with_seccomp 1
+%endif
+%endif
+
+%if 0%{?fedora} >= 22
+%global luaver 5.3
+%else
+%if 0%{?fedora} >= 20
+%global luaver 5.2
+%else
+%global luaver 5.1
+%endif
+%endif
+%global lualibdir %{_libdir}/lua/%{luaver}
+%global luapkgdir %{_datadir}/lua/%{luaver}
+
+# for pre-releases
+#global prerel
+%global commit {{ lxc_commit }}
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
+
+Name:           lxc
+Version:        {{ lxc_version }}
+Release:        %{?prerel:0.}1%{?prerel:.%{prerel}}%{?dist}.1
+Summary:        Linux Resource Containers
+Group:          Applications/System
+License:        LGPLv2+ and GPLv2
+URL:            http://linuxcontainers.org
+%if 0%{?prerel:1}
+Source0:        https://github.com/lxc/lxc/archive/%{commit}/%{name}-%{commit}.tar.gz
+%else
+Source0:        http://linuxcontainers.org/downloads/%{name}-%{version}.tar.gz
+%endif
+BuildRequires:  docbook-utils
+BuildRequires:  docbook2X
+BuildRequires:  doxygen
+BuildRequires:  kernel-headers
+BuildRequires:  libselinux-devel
+%if 0%{?with_seccomp}
+BuildRequires:  libseccomp-devel
+%endif # with_seccomp
+BuildRequires:  libcap-devel
+BuildRequires:  libtool
+BuildRequires:  lua-devel
+%if 0%{?with_python3}
+BuildRequires:  python3-devel >= 3.2
+%endif # with_python3
+%if 0%{?with_systemd}
+BuildRequires:  systemd
+%endif # with_systemd
+%if 0%{?prerel:1}
+BuildRequires:  autoconf automake
+%endif
+
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
+
+%description
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+
+%package        libs
+Summary:        Runtime library files for %{name}
+Group:          System Environment/Libraries
+# rsync is called in bdev.c, e.g. by lxc-clone
+Requires:       rsync
+%if 0%{?with_systemd}
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
+%else
+Requires(post): chkconfig
+Requires(preun): initscripts, chkconfig
+Requires(postun): initscripts
+%endif # with_systemd
+
+
+%description    libs
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+The %{name}-libs package contains libraries for running %{name} applications.
+
+
+%if 0%{?with_python3}
+%package        -n python3-%{name}
+Summary:        Python binding for %{name}
+Group:          System Environment/Libraries
+
+%description    -n python3-%{name}
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+The python3-%{name} package contains the Python3 binding for %{name}.
+
+%global __provides_exclude %{?__provides_exclude:%__provides_exclude|}_lxc\\..*\\.so
+
+
+%package        extra
+Summary:        Extra tools for %{name}
+Group:          Applications/System
+Requires:       python3-%{name}%{?_isa} = %{version}-%{release}
+
+%description    extra
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+This package contains tools needing the Python3 bindings.
+%endif # with_python3
+
+
+%package        -n lua-%{name}
+Summary:        Lua binding for %{name}
+Group:          System Environment/Libraries
+Requires:       lua-filesystem
+
+%description    -n lua-%{name}
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+The lua-%{name} package contains the Lua binding for %{name}.
+
+%global __provides_exclude %{?__provides_exclude:%__provides_exclude|}core\\.so\\.0
+
+
+%package        templates
+Summary:        Templates for %{name}
+Group:          System Environment/Libraries
+Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
+# Note: Requirements for the template scripts (busybox, dpkg,
+# debootstrap, rsync, openssh-server, dhclient, apt, pacman, zypper,
+# ubuntu-cloudimg-query etc...) are not explicitly mentioned here:
+# their presence varies wildly on supported Fedora/EPEL releases and
+# archs, and they are in most cases needed for a single template
+# only. Also, the templates normally fail graciously when such a tool
+# is missing. Moving each template to its own subpackage on the other
+# hand would be overkill.
+
+
+%description    templates
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+The %{name}-templates package contains templates for creating containers.
+
+
+%package        devel
+Summary:        Development files for %{name}
+Group:          Development/Libraries
+Requires:       %{name}-libs%{?_isa} = %{version}-%{release}
+Requires:       pkgconfig
+
+%description    devel
+Linux Resource Containers provide process and resource isolation without the
+overhead of full virtualization.
+
+The %{name}-devel package contains libraries and header files for
+developing applications that use %{name}.
+
+
+%package        doc
+Summary:        Documentation for %{name}
+Group:          Documentation
+BuildArch:      noarch
+
+%description    doc
+This package contains documentation for %{name}.
+
+
+%prep
+%setup -q -n %{name}-%{?!prerel:%{version}}%{?prerel:%{commit}}
+
+
+%build
+%if 0%{?prerel:1}
+./autogen.sh
+%endif
+%configure --with-distro=fedora \
+           --enable-doc \
+           --enable-api-docs \
+           --disable-silent-rules \
+           --docdir=%{_pkgdocdir} \
+           --disable-rpath \
+           --disable-apparmor \
+           --disable-cgmanager \
+           --enable-selinux \
+%if 0%{?with_seccomp}
+           --enable-seccomp \
+%endif # with_seccomp
+           --enable-lua \
+%if 0%{?with_python3}
+           --enable-python \
+%else
+           --disable-python \
+%endif # with_python3
+%if 0%{?with_systemd}
+           --with-init-script=systemd \
+%else
+           --with-init-script=sysvinit \
+%endif # with_systemd
+# intentionally blank line
+make %{?_smp_mflags}
+
+
+%install
+%{make_install}
+make DESTDIR=%{buildroot} install
+mkdir -p %{buildroot}%{_sharedstatedir}/%{name}
+chmod -x %{buildroot}%{luapkgdir}/lxc.lua
+
+mkdir -p %{buildroot}%{_pkgdocdir}
+cp -a AUTHORS README %{!?_licensedir:COPYING} %{buildroot}%{_pkgdocdir}
+mkdir -p %{buildroot}%{_pkgdocdir}/api
+cp -a doc/api/html/* %{buildroot}%{_pkgdocdir}/api/
+
+# cache dir
+mkdir -p %{buildroot}%{_localstatedir}/cache/%{name}
+
+
+%check
+make check
+
+
+%post libs
+/sbin/ldconfig
+%if 0%{?with_systemd}
+%systemd_post %{name}-net.service
+%systemd_post %{name}.service
+%else
+/sbin/chkconfig --add %{name}-net
+/sbin/chkconfig --add %{name}
+%endif # with_systemd
+
+
+%preun libs
+%if 0%{?with_systemd}
+%systemd_preun %{name}-net.service
+%systemd_preun %{name}.service
+%else
+if [ $1 -eq 0 ]; then
+        /sbin/service %{name}-net stop > /dev/null 2>&1
+        /sbin/chkconfig --del %{name}-net
+        /sbin/service %{name} stop > /dev/null 2>&1
+        /sbin/chkconfig --del %{name}
+fi
+%endif # with_systemd
+
+
+%postun libs
+/sbin/ldconfig
+%if 0%{?with_systemd}
+%systemd_postun %{name}-net.service
+%systemd_postun %{name}.service
+%else
+if [ $1 -ge 1 ]; then
+        /sbin/service %{name}-net condrestart > /dev/null 2>&1 || :
+        /sbin/service %{name} condrestart > /dev/null 2>&1 || :
+fi
+%endif # with_systemd
+
+
+%files
+%{_bindir}/%{name}-*
+%{_mandir}/man1/%{name}*
+%{_mandir}/*/man1/%{name}*
+# in lxc-libs:
+%exclude %{_bindir}/%{name}-autostart
+%exclude %{_mandir}/man1/%{name}-autostart*
+%exclude %{_mandir}/*/man1/%{name}-autostart*
+%exclude %{_mandir}/man1/%{name}-user-nic*
+%exclude %{_mandir}/*/man1/%{name}-user-nic*
+%{_datadir}/%{name}/%{name}.functions
+%if 0%{?with_python3}
+%exclude %{_bindir}/%{name}-ls
+%exclude %{_bindir}/%{name}-start-ephemeral
+%exclude %{_mandir}/man1/%{name}-ls*
+%exclude %{_mandir}/man1/%{name}-start-ephemeral*
+%exclude %{_mandir}/*/man1/%{name}-ls*
+%exclude %{_mandir}/*/man1/%{name}-start-ephemeral*
+%endif
+%dir %{_sysconfdir}/bash_completion.d/
+%{_sysconfdir}/bash_completion.d/%{name}
+
+
+%files libs
+%dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/templates
+%dir %{_datadir}/%{name}/config
+%{_datadir}/%{name}/hooks
+%{_datadir}/%{name}/%{name}-patch.py*
+%{_datadir}/%{name}/selinux
+%{_libdir}/liblxc.so.*
+%{_libdir}/%{name}
+%{_libexecdir}/%{name}
+# fixme: should be in libexecdir?
+%{_sbindir}/init.%{name}
+%{_bindir}/%{name}-autostart
+%{_sharedstatedir}/%{name}
+%dir %{_sysconfdir}/%{name}
+%config(noreplace) %{_sysconfdir}/%{name}/default.conf
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
+%{_mandir}/man1/%{name}-autostart*
+%{_mandir}/*/man1/%{name}-autostart*
+%{_mandir}/man1/%{name}-user-nic*
+%{_mandir}/*/man1/%{name}-user-nic*
+%{_mandir}/man5/%{name}*
+%{_mandir}/man7/%{name}*
+%{_mandir}/*/man5/%{name}*
+%{_mandir}/*/man7/%{name}*
+%dir %{_pkgdocdir}
+%{_pkgdocdir}/AUTHORS
+%{_pkgdocdir}/README
+%if 0%{?_licensedir:1}
+%license COPYING
+%else
+%{_pkgdocdir}/COPYING
+%endif
+%if 0%{?with_systemd}
+%{_unitdir}/%{name}.service
+%{_unitdir}/%{name}-net.service
+%else
+%{_sysconfdir}/rc.d/init.d/%{name}
+%{_sysconfdir}/rc.d/init.d/%{name}-net
+%endif # with_systemd
+%dir %{_localstatedir}/cache/%{name}
+
+
+%if 0%{?with_python3}
+%files -n python3-%{name}
+%{python3_sitearch}/*
+
+
+%files extra
+%{_bindir}/%{name}-ls
+%{_bindir}/%{name}-start-ephemeral
+%{_mandir}/man1/%{name}-ls*
+%{_mandir}/man1/%{name}-start-ephemeral*
+%{_mandir}/*/man1/%{name}-ls*
+%{_mandir}/*/man1/%{name}-start-ephemeral*
+%endif # with_python3
+
+
+%files -n lua-%{name}
+%{lualibdir}/%{name}
+%{luapkgdir}/%{name}.lua
+
+
+%files templates
+%{_datadir}/%{name}/templates/lxc-*
+%{_datadir}/%{name}/config/*
+
+
+%files devel
+%{_libdir}/pkgconfig/%{name}.pc
+%{_includedir}/lxc
+%{_libdir}/liblxc.so
+
+
+%files doc
+%dir %{_pkgdocdir}
+# README, AUTHORS and COPYING intentionally duplicated because -doc
+# can be installed on its own.
+%{_pkgdocdir}/*
+%if 0%{?_licensedir:1}
+%license COPYING
+%endif
+
+
+%changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.2-1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
+* Mon Apr 20 2015 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.2-1
+- Update to 1.1.2.
+- Add patch to fix building of the lua bindings.
+
+* Tue Mar 17 2015 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.1-2
+- Use %%license only where possible.
+
+* Tue Mar 17 2015 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.1-1
+- Update to 1.1.1.
+- Add dependency on rsync (rhbz#1177981).
+- Tag COPYING with %%licence.
+
+* Mon Feb 16 2015 Peter Robinson <pbrobinson@fedoraproject.org> 1.1.0-3
+- aarch64 now has seccomp support
+
+* Tue Feb 10 2015 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.0-2
+- lxc-top no longer relies on the lua bindings.
+- lxc-device no longer relies on the python3 bindings.
+- Spec file cleanups.
+
+* Sun Feb  8 2015 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.0-1
+- Update to 1.1.0.
+
+* Sat Aug 30 2014 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.0-0.3.alpha1
+- Add missing dependency on lua-alt-getopt (rhbz#1131707).
+
+* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.0-0.2.alpha1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
+* Mon Aug 11 2014 Jakub Čajka <jcajka@redhat.com> - 1.1.0-0.2.alpha1
+- Fixed build dependencies on s390(x) and ppc(64(le))
+
+* Sun Aug 10 2014 Thomas Moschny <thomas.moschny@gmx.de> - 1.1.0-0.1.alpha1
+- Update to 1.1.0.alpha1.
+
+* Fri Aug  8 2014 Thomas Moschny <thomas.moschny@gmx.de> - 1.0.5-2
+- Include sysvinit resp. systemd support for autostart of containers.
+- Do not list explicit requirements for templates.
+- Add missing dependency on lxc-lua for lxc-top.
+- Include apidocs.
+
+* Fri Aug  8 2014 Peter Robinson <pbrobinson@fedoraproject.org> 1.0.5-1
+- Update to 1.0.5
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Wed Jun  4 2014 Thomas Moschny <thomas.moschny@gmx.de> - 1.0.3-1
+- Update to 1.0.3.
+- Remove obsolete patches.
+- Add systemd support.
+- Lua bindings are not optional (needed e.g. for lxc-top).
+
+* Wed May 28 2014 Kalev Lember <kalevlember@gmail.com> - 0.9.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Changes/Python_3.4
+
+* Thu Jan 30 2014 Marek Goldmann <mgoldman@redhat.com> - 0.9.0-3
+- There is still no Python 3 available in EPEL 7
+
+* Wed Sep  4 2013 Thomas Moschny <thomas.moschny@gmx.de> - 0.9.0-2
+- Small fix to the included Fedora template.
+
+* Sun Sep  1 2013 Thomas Moschny <thomas.moschny@gmx.de> - 0.9.0-1
+- Update to 0.9.0.
+- Make the -libs subpackage installable on its own:
+  - Move files needed by the libraries to the subpackage.
+  - Let packages depend on -libs.
+- Add rsync as dependency to the templates package.
+- Add (optional) subpackages for Python3 and Lua bindings.
+- Add upstream patches for the Fedora template.
+- Define and use the _pkgdocdir macro, also fixing rhbz#1001235.
+- Update License tag.
+
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.8.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Sat Mar  2 2013 Thomas Moschny <thomas.moschny@gmx.de> - 0.8.0-2
+- Add upstream patch fixing the release url in the Fedora template.
+
+* Fri Feb 15 2013 Thomas Moschny <thomas.moschny@gmx.de> - 0.8.0-1
+- Update to 0.8.0.
+- Modernize spec file.
+- Include more templates.
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.7.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.7.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Mon Mar 26 2012 Thomas Moschny <thomas.moschny@gmx.de> - 0.7.5-1
+- Update to upstream 0.7.5
+- No need to run autogen.sh
+- Fix: kernel header asm/unistd.h was not found
+- Specfile cleanups
+
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.7.4.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Wed Jul 06 2011 Adam Miller <maxamillion@fedoraproject.org> - 0.7.4.2-1
+- Update to upstream 0.7.4.2
+
+* Fri Mar 25 2011 Silas Sewell <silas@sewell.ch> - 0.7.4.1-1
+- Update to 0.7.4.1
+
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.7.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Mon Jul 26 2010 Silas Sewell <silas@sewell.ch> - 0.7.2-1
+- Update to 0.7.2
+- Remove templates
+
+* Tue Jul 06 2010 Silas Sewell <silas@sewell.ch> - 0.7.1-1
+- Update to 0.7.1
+
+* Wed Feb 17 2010 Silas Sewell <silas@sewell.ch> - 0.6.5-1
+- Update to latest release
+- Add /var/lib/lxc directory
+- Patch for sys/stat.h
+
+* Fri Nov 27 2009 Silas Sewell <silas@sewell.ch> - 0.6.4-1
+- Update to latest release
+- Add documentation sub-package
+
+* Mon Jul 27 2009 Silas Sewell <silas@sewell.ch> - 0.6.3-2
+- Apply patch for rawhide kernel
+
+* Sat Jul 25 2009 Silas Sewell <silas@sewell.ch> - 0.6.3-1
+- Initial package

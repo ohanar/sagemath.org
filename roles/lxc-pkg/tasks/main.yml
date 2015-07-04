@@ -9,6 +9,7 @@
     state: present
   with_items:
     - "@Development tools"
+    - rpmdevtools
     - docbook-utils
     - docbook2X
     - libselinux-devel
@@ -16,9 +17,30 @@
     - libcap-devel
     - lua-devel
 
+- name: making rpmbuild directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ rpm_spec_dir }}"
+    - "{{ rpm_src_dir }}"
+
+- name: copying over build spec
+  template:
+    src: lxc.spec.j2
+    dest: "{{ lxc_spec }}"
+
+- name: downloading source
+  command: >
+    /usr/bin/spectool --get-files --sourcedir
+      {{ lxc_prerel_define }} {{ lxc_spec }}
+  args:
+    creates: "{{ lxc_source }}"
+
 - name: building
   command: >
-    /usr/bin/rpmbuild --rebuild {{ lxc_url }}
+    /usr/bin/rpmbuild -bb
+      {{ lxc_prerel_define }} {{ lxc_spec }}
   args:
     creates: "{{ lxc_pkg }}"
 

@@ -1,18 +1,24 @@
 ---
-lxc_version: 1.1.2
-lxc_release: 1
-lxc_verrel: "{{ lxc_version }}-{{ lxc_release }}"
+lxc_version: 1.1.3
+lxc_commit: 58b46c0f1599a6590b388ed40fedc0cc7888371c
+lxc_prerel: 1
 
-lxc_url: "ftp://rpmfind.net/linux/fedora/linux/development/rawhide/source/SRPMS/l/lxc-{{ lxc_verrel }}.fc23.1.src.rpm"
+lxc_prerel_define: "{{ '--define \"prerel ' + lxc_prerel|string + '\"' if lxc_prerel is defined else '' }}"
+
+lxc_release: "{{ '0.1.' + lxc_prerel|string if lxc_prerel is defined else '1' }}.el7.{{ ansible_distribution|lower }}.1"
+lxc_verrel: "{{ lxc_version }}-{{ lxc_release }}"
 
 rpm_src_dir: "{{ ansible_user_dir }}/rpmbuild/SOURCES"
 rpm_spec_dir: "{{ ansible_user_dir }}/rpmbuild/SPECS"
 rpm_out_dir: "{{ ansible_user_dir }}/rpmbuild/RPMS/{{ ansible_architecture }}"
 
-lxc_libs: "{{ rpm_out_dir }}/lxc-libs-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
-lxc_lua: "{{ rpm_out_dir }}/lua-lxc-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
-lxc_pkg: "{{ rpm_out_dir }}/lxc-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
-lxc_templates: "{{ rpm_out_dir }}/lxc-templates-{{ lxc_verrel }}.el7.centos.1.{{ ansible_architecture }}.rpm"
+lxc_spec: "{{ rpm_spec_dir }}/lxc.spec"
+lxc_source: "{{ rpm_src_dir }}/lxc-{{ lxc_commit|string if lxc_commit is defined else lxc_version }}.tar.gz"
+
+lxc_libs: "{{ rpm_out_dir }}/lxc-libs-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
+lxc_lua: "{{ rpm_out_dir }}/lua-lxc-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
+lxc_pkg: "{{ rpm_out_dir }}/lxc-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
+lxc_templates: "{{ rpm_out_dir }}/lxc-templates-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
 
 lxc_pkgs:
   - "{{ lxc_libs }}"
