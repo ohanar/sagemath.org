@@ -1,5 +1,6 @@
 - name: restarting
   when: ansible_os_family == "RedHat"
+  sudo: true
   service:
     name: network
     enabled: true

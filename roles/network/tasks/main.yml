@@ -1,12 +1,14 @@
 ---
 - name: installing dependencies
   when: ansible_os_family == "RedHat"
+  sudo: true
   yum:
     name: bridge-utils
     state: present
 
 - name: configuring
   when: ansible_os_family == "RedHat"
+  sudo: true
   template:
     src: ifcfg.j2
     dest: /etc/sysconfig/network-scripts/ifcfg-{{ item.key }}
