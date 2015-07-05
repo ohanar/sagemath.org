@@ -58,3 +58,4 @@
   with_items:
     - blcr_imports
     - blcr
+  when: blcr.modules is defined and blcr.modules
