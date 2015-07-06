@@ -1,14 +1,7 @@
 ---
 - hosts: devhosts
   roles:
-    -
-      role: common
-      tags:
-        - common
-    -
-      role: baremetal
-      tags:
-        - baremetal
+    - common
     -
       role: lxc
       tags:

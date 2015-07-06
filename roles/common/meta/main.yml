@@ -1,0 +1,11 @@
+---
+dependencies:
+  -
+    role: network
+    tags:
+      - network
+  -
+    role: willshersystems.sshd
+    sudo: true
+    tags:
+      - ssh

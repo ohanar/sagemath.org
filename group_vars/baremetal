@@ -1,0 +1,5 @@
+---
+sshd:
+  PermitRootLogin: false
+  PasswordAuthentication: false
+  X11Forwarding: false

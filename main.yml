@@ -2,3 +2,4 @@
 - include: devhosts.yml
 - include: slurmhosts.yml
 - include: webhosts.yml
+- include: webservers.yml
