@@ -1,6 +1,6 @@
 ---
 network_interfaces:
-  br0:
+  bond0:
     ipaddr:  128.208.160.209
     gateway: 128.208.160.129
     netmask: 255.255.255.128

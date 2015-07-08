@@ -6,7 +6,28 @@
     name: bridge-utils
     state: present
 
-- name: configuring
+# for ansible 2.0+:
+#- name: determining current interfaces
+#  find:
+#    paths: /etc/sysconfig/network-scripts
+#    patterns: "ifcfg-*"
+#  register: cur_ifcfgs
+
+- name: determining running interfaces
+  command: find /etc/sysconfig/network-scripts -name 'ifcfg-*' -and -not -name 'ifcfg-lo'
+  changed_when: false
+  register: cur_ifcfgs
+
+- name: removing old interfaces
+  sudo: true
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items: cur_ifcfgs.stdout.split("\n")
+  when: item.split("-")[2] not in network_interfaces.keys()
+  notify: restarting
+
+- name: installing interfaces
   when: ansible_os_family == "RedHat"
   sudo: true
   template:
