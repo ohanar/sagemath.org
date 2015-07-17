@@ -5,4 +5,4 @@ network_interfaces:
     ipaddr:  128.208.178.248
     gateway: 128.208.178.193
     netmask: 255.255.255.192
-    hwaddr: "52:54:00:49:03:EA"
+    hwaddr: "52:54:00:DF:19:75"

@@ -1,0 +1,12 @@
+---
+- name: adding zfsonlinux repo
+  sudo: true
+  yum:
+    name: http://archive.zfsonlinux.org/epel/zfs-release.el7.noarch.rpm
+    state: present
+
+- name: installing
+  sudo: true
+  yum:
+    name: zfs
+    state: present

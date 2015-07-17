@@ -1,0 +1,25 @@
+---
+- name: installing
+  sudo: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - qemu-kvm
+    - libvirt
+
+- name: adding management rule
+  sudo: true
+  copy:
+    src: 80-libvirt-manage.rules
+    dest: /etc/polkit-1/rules.d/80-libvirt-manage.rules
+    owner: root
+    group: root
+    mode: 0644
+
+- name: starting and enabling service
+  sudo: true
+  service:
+    name: libvirtd
+    enabled: true
+    state: started

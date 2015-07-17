@@ -38,3 +38,11 @@
     mode: 0644
   with_dict: "{{ network_interfaces }}"
   notify: restarting
+
+- name: disabling and stoping NetworkManager
+  when: ansible_os_family == "RedHat"
+  sudo: true
+  service:
+    name: NetworkManager
+    enabled: false
+    state: stopped

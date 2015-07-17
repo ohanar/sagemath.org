@@ -2,3 +2,11 @@
 - hosts: webhosts
   roles:
     - common
+    -
+      role: zfs
+      tags:
+        - zfs
+    -
+      role: libvirt
+      tags:
+        - libvirt
