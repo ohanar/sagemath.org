@@ -2,7 +2,7 @@
 network_interfaces:
   eth0:
     type: Ethernet
-    ipaddr:  128.208.178.250
-    gateway: 128.208.178.193
-    netmask: 255.255.255.192
+    ipaddr:  128.208.160.251
+    gateway: 128.208.160.129
+    netmask: 255.255.255.128
     hwaddr: "52:54:00:BC:46:36"

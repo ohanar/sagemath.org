@@ -1,7 +1,7 @@
 ---
 network_interfaces:
   bond0:
-    ipaddr:  128.208.160.164
+    ipaddr:  128.208.160.140
     gateway: 128.208.160.129
     netmask: 255.255.255.128
   em1:

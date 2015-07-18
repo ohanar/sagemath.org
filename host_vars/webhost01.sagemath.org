@@ -1,7 +1,7 @@
 ---
 network_interfaces:
   br0:
-    ipaddr:  128.208.160.210
+    ipaddr:  128.208.160.136
     gateway: 128.208.160.129
     netmask: 255.255.255.128
   em1:

@@ -24,3 +24,6 @@ BONDING_OPTS="{{ item.value.opts }}"
 {% if item.value.type == "Bridge" and item.value.delay is defined %}
 DELAY={{ item.value.delay }}
 {% endif %}
+{% if item.value.type == "Bridge" and item.value.stp is defined %}
+STP={{ "yes" if item.value.stp else "no" }}
+{% endif %}
