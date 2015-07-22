@@ -1,6 +1,6 @@
 ---
 - name: setting some variables
-  include_vars: lxc_vars.yml
+  include_vars: main.yml
 
 - name: installing dependencies
   sudo: true
@@ -16,6 +16,8 @@
     - libseccomp-devel
     - libcap-devel
     - lua-devel
+    - python-pip
+    - python-devel
 
 - name: making rpmbuild directories
   file:
@@ -50,3 +52,15 @@
     name: "{{ item }}"
     state: present
   with_items: lxc_pkgs
+
+- name: installing python bindings
+  sudo: true
+  pip:
+    name: lxc-python2
+
+- name: checking for selinux policy
+  sudo: true
+  shell: semodule -l | grep -q lxcnet
+  register: lxcnet_policy_search
+  changed_when: lxcnet_policy_search.rc != 0
+  notify: copying selinux policy

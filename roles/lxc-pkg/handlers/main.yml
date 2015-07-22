@@ -1,0 +1,10 @@
+---
+- name: copying selinux policy
+  copy:
+    src: lxcnet.pp
+    dest: /tmp/lxcnet.pp
+  notify: installing selinux policy
+
+- name: installing selinux policy
+  sudo: true
+  command: semodule -i /tmp/lxcnet.pp

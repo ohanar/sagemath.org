@@ -1,7 +1,7 @@
 ---
 lxc_version: 1.1.3
-lxc_commit: 58b46c0f1599a6590b388ed40fedc0cc7888371c
-lxc_prerel: 1
+lxc_commit: 3d6347a4cd69f5593b233fcba8354986df4c1767
+lxc_prerel: 2
 
 lxc_prerel_define: "{{ '--define \"prerel ' + lxc_prerel|string + '\"' if lxc_prerel is defined else '' }}"
 
@@ -19,9 +19,11 @@ lxc_libs: "{{ rpm_out_dir }}/lxc-libs-{{ lxc_verrel }}.{{ ansible_architecture }
 lxc_lua: "{{ rpm_out_dir }}/lua-lxc-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
 lxc_pkg: "{{ rpm_out_dir }}/lxc-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
 lxc_templates: "{{ rpm_out_dir }}/lxc-templates-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
+lxc_devel: "{{ rpm_out_dir }}/lxc-devel-{{ lxc_verrel }}.{{ ansible_architecture }}.rpm"
 
 lxc_pkgs:
   - "{{ lxc_libs }}"
   - "{{ lxc_lua }}"
   - "{{ lxc_pkg }}"
   - "{{ lxc_templates }}"
+  - "{{ lxc_devel }}"
