@@ -1,0 +1,70 @@
+---
+- hosts: vms
+  serial: 1
+  pre_tasks:
+    - name: attaching disk to vm
+      become: true
+      delegate_to: localhost
+      command: virsh attach-disk {{ ansible_hostname }} /dev/disk/by-label/VMbackup sdz --targetbus scsi --sourcetype block
+      changed_when: true
+
+    - name: making mount directory
+      become: true
+      file:
+        path: /mnt/backup
+        state: directory
+        mode: 0700
+        owner: root
+        group: root
+
+    - name: mounting disk in vm
+      become: true
+      mount:
+        name: /mnt/backup
+        src: /dev/disk/by-label/VMbackup
+        fstype: ext4
+        state: mounted
+
+  tasks:
+    - name: installing ius-release
+      become: true
+      yum:
+        name: https://dl.iuscommunity.org/pub/ius/stable/CentOS/7/x86_64/ius-release-1.0-14.ius.centos7.noarch.rpm
+        state: present
+
+    - name: installing borg dependencies
+      become: true
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "@Development Tools"
+        - libacl-devel
+        - openssl-devel
+        - python34u-devel
+        - python34u-pip
+
+    - name: installing borg
+      become: true
+      pip:
+        name: borgbackup
+        state: present
+        executable: pip3
+
+    - name: running borg
+      become: true
+      shell: borg create /mnt/backup/{{ ansible_hostname }}::{{ ansible_date_time.date }} $(mount | grep '^/dev/sd' | cut -d' ' -f3 | sed "/^\/mnt\/backup/d") --do-not-cross-mountpoints
+
+  post_tasks:
+    - name: unmounting disk in vm
+      become: true
+      mount:
+        name: /mnt/backup
+        src: /dev/disk/by-label/VMbackup
+        fstype: ext4
+        state: unmounted
+
+    - name: detaching disk from vm
+      become: true
+      delegate_to: localhost
+      command: virsh detach-disk {{ ansible_hostname }} /dev/disk/by-label/VMbackup

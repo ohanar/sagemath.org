@@ -1,0 +1,58 @@
+---
+- name: installing dependencies
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ansible
+    - rsync
+
+- name: installing backup playbook
+  become: true
+  become_user: backup
+  copy:
+    src: "backup.yml"
+    dest: "~backup/backup.yml"
+    mode: 0600
+    owner: backup
+    group: backup
+
+- name: installing host file
+  become: true
+  become_user: backup
+  template:
+    src: hosts.j2
+    dest: "~backup/hosts"
+    mode: 0600
+    owner: backup
+    group: backup
+
+- name: installing zfs snapshot script
+  become: true
+  become_user: backup
+  template:
+    src: snapshot-and-receive.sh.j2
+    dest: "~backup/snapshot-and-receive.sh"
+    mode: 0700
+    owner: backup
+    group: backup
+
+- name: installing overall backup script
+  become: true
+  become_user: backup
+  copy:
+    src: "backup.sh"
+    dest: "~backup/backup.sh"
+    mode: 0700
+    owner: backup
+    group: backup
+
+- name: installing backup cron job
+  become: true
+  cron:
+    name: backup script for vms
+    user: backup
+    minute: 0
+    hour: "{{ backup_cron_hour }}"
+    job: ./backup.sh

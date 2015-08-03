@@ -46,3 +46,10 @@
     name: NetworkManager
     enabled: false
     state: stopped
+
+- name: adding ip to hosts
+  sudo: true
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{ network_interfaces[primary_network_interface].ipaddr }} {{ ansible_nodename }}"
+    state: present

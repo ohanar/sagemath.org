@@ -8,3 +8,9 @@ network_interfaces:
     hwaddr: "04:7D:7B:B0:B2:97"
   em2:
     hwaddr: "04:7D:7B:B0:B2:98"
+
+hosted_vms: []
+
+remote_zpool_host: webhost00.sagemath.org
+
+backup_cron_hour: 18

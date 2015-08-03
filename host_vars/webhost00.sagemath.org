@@ -8,3 +8,12 @@ network_interfaces:
     hwaddr: "04:7D:7B:B0:B1:98"
   em2:
     hwaddr: "04:7D:7B:B0:B1:99"
+
+hosted_vms:
+  - fileserver.sagemath.org
+  - patchbot.sagemath.org
+  - wstein.org
+
+remote_zpool_host: webhost01.sagemath.org
+
+backup_cron_hour: 6

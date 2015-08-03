@@ -1,0 +1,4 @@
+[vms]
+{% for item in hosted_vms %}
+{{ item }} ansible_ssh_host={{ hostvars[item].network_interfaces[hostvars[item].primary_network_interface].ipaddr }}
+{% endfor %}

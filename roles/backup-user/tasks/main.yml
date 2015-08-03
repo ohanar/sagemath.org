@@ -1,0 +1,22 @@
+---
+- name: adding user
+  sudo: true
+  user:
+    name: backup
+    state: present
+
+- name: giving user sudo privaleges
+  sudo: true
+  lineinfile:
+    dest: /etc/sudoers
+    line: '%backup	ALL=(ALL)	NOPASSWD: ALL'
+    state: present
+
+- name: adding users rsa keys
+  sudo: true
+  authorized_key:
+    user: backup
+    key: "{{ item }}"
+    state: present
+  with_file:
+    - id_rsa.pub

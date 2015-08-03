@@ -1,8 +1,9 @@
 ---
+primary_network_interface: br0
 network_interfaces:
   br0:
     type: Bridge
     delay: 0
-    stp: true
+    stp: false
   bond0:
     bridge: br0

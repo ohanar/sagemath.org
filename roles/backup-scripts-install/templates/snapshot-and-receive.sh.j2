@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+REMOTE={{ remote_zpool_host }}
+
+LOCAL_VMS="$(virsh --connect qemu:///system list --name)"
+REMOTE_VMS="$(virsh --connect qemu+ssh://$REMOTE/system list --name)"
+
+DATE="$(date +%Y-%m-%d)"
+
+create-snapshot() (
+  set -e
+  local vm=$1
+
+  local filesystem="vmdisks/$vm"
+  local snapshot="$filesystem@$DATE"
+
+  sudo sh -c "virsh --connect qemu:///system dumpxml $vm > /$filesystem/${vm}_config.xml"
+
+  if ! sudo zfs list -t snapshot -o name | grep -q "^$snapshot\$"; then
+    sudo zfs snapshot -r vmdisks/$vm@$DATE
+  fi
+)
+
+sync-snapshots() (
+  set -e
+  local vm=$1
+
+  local old_snapshot=$(sudo zfs list -t snapshot -o name -S creation | grep "^vmdisks/$vm" | head -1)
+  local new_snapshot=$(ssh $REMOTE "sudo zfs list -t snapshot -o name -S creation" | grep "^vmdisks/$vm" | head -1)
+
+  if [ "$old_snapshot" != "$new_snapshot" ]; then
+    if [ -z "$old_snapshot" ]; then
+      ssh $REMOTE "sudo zfs send -R $new_snapshot | lz4" | lz4cat | sudo zfs receive -du vmdisks
+    else
+      ssh $REMOTE "sudo zfs send -R -i $old_snapshot $new_snapshot | cat" | sudo zfs receive -du vmdisks
+    fi
+  fi
+)
+
+for vm in $LOCAL_VMS; do
+  create-snapshot $vm
+done
+
+for vm in $REMOTE_VMS; do
+  sync-snapshots $vm
+done
