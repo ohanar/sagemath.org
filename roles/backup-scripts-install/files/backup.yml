@@ -53,6 +53,8 @@
 
     - name: running borg
       become: true
+      environment:
+        BORG_RELOCATED_REPO_ACCESS_IS_OK: yes
       shell: borg create /mnt/backup/{{ ansible_hostname }}::{{ ansible_date_time.date }} $(mount | grep '^/dev/sd' | cut -d' ' -f3 | sed "/^\/mnt\/backup/d") --do-not-cross-mountpoints
 
   post_tasks:
