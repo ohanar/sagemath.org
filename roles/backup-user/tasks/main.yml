@@ -1,19 +1,21 @@
 ---
 - name: adding user
-  sudo: true
+  become: true
   user:
     name: backup
+    groups: wheel
+    append: true
     state: present
 
 - name: giving user sudo privaleges
-  sudo: true
+  become: true
   lineinfile:
     dest: /etc/sudoers
     line: '%backup	ALL=(ALL)	NOPASSWD: ALL'
     state: present
 
 - name: adding users rsa keys
-  sudo: true
+  become: true
   authorized_key:
     user: backup
     key: "{{ item }}"
